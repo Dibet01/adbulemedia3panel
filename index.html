@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaultra — Claim Your Reward</title>
+<style>
+  :root{
+    --navy-deep:#0d1b26;
+    --navy-card:#132a38;
+    --navy-line:#20404f;
+    --gold:#c9a227;
+    --gold-bright:#e8c04d;
+    --ivory:#f4efe4;
+    --ivory-dim:#a9b7bd;
+    --teal:#1f5f66;
+    --radius:14px;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--navy-deep);
+    color:var(--ivory);
+    font-family:var(--body);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+
+  .noise{
+    position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* NAV */
+  header{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 6vw;
+    background:rgba(13,27,38,.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--navy-line);
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--display); font-weight:700; font-size:1.25rem;
+    letter-spacing:.02em;
+  }
+  .logo-mark{width:34px; height:34px; flex-shrink:0;}
+  .logo-mark svg{width:100%; height:100%;}
+  nav ul{display:flex; gap:32px; list-style:none;}
+  nav a{
+    font-size:.9rem; color:var(--ivory-dim); font-weight:500;
+    transition:color .2s;
+  }
+  nav a:hover{color:var(--gold-bright);}
+  .nav-cta{
+    background:var(--gold); color:var(--navy-deep); font-weight:600;
+    padding:10px 20px; border-radius:100px; font-size:.85rem;
+    transition:transform .15s, background .2s;
+  }
+  .nav-cta:hover{background:var(--gold-bright); transform:translateY(-1px);}
+
+  /* HERO */
+  .hero{
+    position:relative; z-index:2;
+    padding:96px 6vw 80px;
+    display:grid; grid-template-columns:1.1fr .9fr; gap:60px;
+    align-items:center;
+    max-width:1400px; margin:0 auto;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--gold-bright); border:1px solid var(--navy-line);
+    padding:6px 14px; border-radius:100px; margin-bottom:24px;
+  }
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--gold-bright); animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.3;}}
+
+  h1{
+    font-family:var(--display); font-weight:700;
+    font-size:clamp(2.4rem, 4.4vw, 4rem);
+    line-height:1.05; letter-spacing:-.01em;
+    margin-bottom:22px;
+  }
+  h1 .accent{color:var(--gold-bright);}
+  .hero p.lead{
+    font-size:1.1rem; color:var(--ivory-dim); max-width:520px; margin-bottom:36px;
+  }
+  .hero-ctas{display:flex; gap:16px; flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--gold); color:var(--navy-deep); font-weight:600;
+    padding:16px 30px; border-radius:100px; font-size:.95rem;
+    box-shadow:0 8px 30px -8px rgba(201,162,39,.5);
+    transition:transform .15s, box-shadow .2s;
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 12px 34px -6px rgba(201,162,39,.65);}
+  .btn-ghost{
+    border:1px solid var(--navy-line); padding:16px 28px; border-radius:100px;
+    font-size:.95rem; color:var(--ivory); transition:border-color .2s, background .2s;
+  }
+  .btn-ghost:hover{border-color:var(--gold); background:rgba(201,162,39,.06);}
+
+  .stat-row{display:flex; gap:36px; margin-top:48px;}
+  .stat-row div{border-left:1px solid var(--navy-line); padding-left:16px;}
+  .stat-num{font-family:var(--display); font-weight:700; font-size:1.6rem; color:var(--gold-bright);}
+  .stat-label{font-size:.78rem; color:var(--ivory-dim);}
+
+  /* VAULT DIAL - signature element */
+  .vault-wrap{position:relative; display:flex; align-items:center; justify-content:center;}
+  .dial{width:min(420px, 90%); position:relative;}
+  .dial svg{width:100%; height:auto; display:block;}
+  .dial-ring{transform-origin:210px 210px; animation:spin 40s linear infinite;}
+  .dial-ring.rev{animation-direction:reverse; animation-duration:55s;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion: reduce){
+    .dial-ring{animation:none;}
+    .eyebrow .dot{animation:none;}
+  }
+  .dial-center-label{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    text-align:center; font-family:var(--mono);
+  }
+  .dial-center-label .big{font-size:2.1rem; font-weight:600; color:var(--gold-bright); font-family:var(--display);}
+  .dial-center-label .small{font-size:.7rem; color:var(--ivory-dim); letter-spacing:.1em; text-transform:uppercase; margin-top:4px;}
+
+  /* SECTION SHELL */
+  section{padding:88px 6vw; position:relative; z-index:2; max-width:1400px; margin:0 auto;}
+  .section-head{max-width:640px; margin-bottom:56px;}
+  .section-head .eyebrow{margin-bottom:16px;}
+  .section-head h2{
+    font-family:var(--display); font-weight:700; font-size:clamp(1.8rem,3vw,2.6rem);
+    letter-spacing:-.01em; margin-bottom:14px;
+  }
+  .section-head p{color:var(--ivory-dim); font-size:1.02rem;}
+
+  /* OFFERS GRID */
+  .offers-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:24px;
+  }
+  .offer-card{
+    background:linear-gradient(160deg, var(--navy-card), #0f2230);
+    border:1px solid var(--navy-line);
+    border-radius:var(--radius);
+    padding:28px;
+    display:flex; flex-direction:column; gap:18px;
+    position:relative; overflow:hidden;
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .offer-card:hover{transform:translateY(-4px); border-color:var(--gold);}
+  .offer-card::before{
+    content:""; position:absolute; top:-40%; right:-30%; width:220px; height:220px;
+    background:radial-gradient(circle, rgba(201,162,39,.16), transparent 70%);
+    pointer-events:none;
+  }
+  .offer-icon{
+    width:52px; height:52px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(201,162,39,.12); border:1px solid var(--navy-line);
+  }
+  .offer-icon svg{width:26px; height:26px; stroke:var(--gold-bright);}
+  .offer-source{
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ivory-dim);
+  }
+  .offer-title{font-family:var(--display); font-weight:600; font-size:1.3rem;}
+  .offer-desc{font-size:.9rem; color:var(--ivory-dim); flex-grow:1;}
+  .offer-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--gold); color:var(--navy-deep); font-weight:600;
+    padding:13px 20px; border-radius:100px; font-size:.9rem;
+    transition:background .2s, transform .15s;
+  }
+  .offer-btn:hover{background:var(--gold-bright); transform:translateY(-1px);}
+  .offer-btn svg{width:16px; height:16px;}
+
+  /* HOW IT WORKS */
+  .steps{display:grid; grid-template-columns:repeat(3, 1fr); gap:32px;}
+  .step{border-top:1px solid var(--navy-line); padding-top:20px;}
+  .step-code{font-family:var(--mono); color:var(--gold-bright); font-size:.85rem; margin-bottom:10px; display:block;}
+  .step h3{font-family:var(--display); font-size:1.15rem; margin-bottom:8px;}
+  .step p{color:var(--ivory-dim); font-size:.92rem;}
+
+  /* TESTIMONIALS */
+  .testimonial-note{
+    font-size:.78rem; color:var(--ivory-dim); font-family:var(--mono);
+    margin-bottom:28px; padding:10px 16px; border:1px dashed var(--navy-line); border-radius:10px; display:inline-block;
+  }
+  .testi-track{
+    display:flex; gap:22px; overflow-x:auto; padding-bottom:12px;
+    scrollbar-width:thin; scrollbar-color:var(--navy-line) transparent;
+  }
+  .testi-card{
+    min-width:300px; max-width:340px; flex-shrink:0;
+    background:var(--navy-card); border:1px solid var(--navy-line);
+    border-radius:var(--radius); padding:24px;
+  }
+  .testi-stars{color:var(--gold-bright); font-size:.9rem; margin-bottom:12px; letter-spacing:2px;}
+  .testi-quote{font-size:.95rem; color:var(--ivory); margin-bottom:18px;}
+  .testi-person{display:flex; align-items:center; gap:10px;}
+  .testi-avatar{
+    width:36px; height:36px; border-radius:50%; background:var(--teal);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-weight:600; font-size:.85rem;
+  }
+  .testi-name{font-size:.85rem; font-weight:600;}
+  .testi-loc{font-size:.75rem; color:var(--ivory-dim);}
+
+  /* FAQ */
+  .faq-item{
+    border-bottom:1px solid var(--navy-line); padding:22px 0;
+    cursor:pointer;
+  }
+  .faq-q{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--display); font-weight:600; font-size:1.02rem;
+  }
+  .faq-q .plus{transition:transform .25s; color:var(--gold-bright); font-size:1.3rem;}
+  .faq-item.open .plus{transform:rotate(45deg);}
+  .faq-a{
+    max-height:0; overflow:hidden; transition:max-height .3s ease;
+    color:var(--ivory-dim); font-size:.92rem; padding-top:0;
+  }
+  .faq-item.open .faq-a{max-height:200px; padding-top:14px;}
+
+  /* FOOTER CTA */
+  .cta-band{
+    background:linear-gradient(120deg, var(--navy-card), #0a1620);
+    border:1px solid var(--navy-line); border-radius:24px;
+    padding:64px 6vw; text-align:center; margin:0 6vw 40px;
+  }
+  .cta-band h2{font-family:var(--display); font-size:clamp(1.8rem,3vw,2.4rem); margin-bottom:16px;}
+  .cta-band p{color:var(--ivory-dim); max-width:480px; margin:0 auto 32px;}
+
+  footer{
+    border-top:1px solid var(--navy-line); padding:40px 6vw;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  .foot-links{display:flex; gap:24px; list-style:none;}
+  .foot-links a{color:var(--ivory-dim); font-size:.85rem;}
+  .foot-links a:hover{color:var(--gold-bright);}
+  .disclosure{
+    font-size:.72rem; color:var(--ivory-dim); max-width:1400px; margin:0 auto 40px; padding:0 6vw; opacity:.7;
+  }
+
+  @media(max-width:900px){
+    .hero{grid-template-columns:1fr; padding-top:60px;}
+    nav ul{display:none;}
+    .steps{grid-template-columns:1fr;}
+    .stat-row{flex-wrap:wrap; gap:24px;}
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<header>
+  <div class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="18" stroke="#c9a227" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="12" stroke="#e8c04d" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="3.4" fill="#e8c04d"/>
+        <line x1="20" y1="2" x2="20" y2="8" stroke="#c9a227" stroke-width="1.5"/>
+        <line x1="20" y1="32" x2="20" y2="38" stroke="#c9a227" stroke-width="1.5"/>
+        <line x1="2" y1="20" x2="8" y2="20" stroke="#c9a227" stroke-width="1.5"/>
+        <line x1="32" y1="20" x2="38" y2="20" stroke="#c9a227" stroke-width="1.5"/>
+      </svg>
+    </span>
+    Vaultra
+  </div>
+  <nav>
+    <ul>
+      <li><a href="#offers">Offers</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </nav>
+  <a href="#offers" class="nav-cta">View offers</a>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow"><span class="dot"></span> Live offers updating now</div>
+    <h1>Your combination<br>to real <span class="accent">rewards.</span></h1>
+    <p class="lead">Vaultra curates today's top verified offers — gift cards, cash rewards, and sweepstakes entries — into one simple dial. Pick one, spin through the steps, claim it.</p>
+    <div class="hero-ctas">
+      <a href="#offers" class="btn-primary">Unlock today's offers</a>
+      <a href="#how" class="btn-ghost">See how it works</a>
+    </div>
+    <div class="stat-row">
+      <div><div class="stat-num">5</div><div class="stat-label">Active offers today</div></div>
+      <div><div class="stat-num">2 min</div><div class="stat-label">Avg. claim time</div></div>
+      <div><div class="stat-num">100%</div><div class="stat-label">Free to enter</div></div>
+    </div>
+  </div>
+
+  <div class="vault-wrap">
+    <div class="dial">
+      <svg viewBox="0 0 420 420" fill="none">
+        <g class="dial-ring">
+          <circle cx="210" cy="210" r="200" stroke="#20404f" stroke-width="1.5" stroke-dasharray="2 10"/>
+          <text fill="#a9b7bd" font-family="JetBrains Mono" font-size="11" letter-spacing="3">
+            <textPath href="#circlePath">GAS • PAYPAL • SWEEPSTAKES • PRIZES • DINING •</textPath>
+          </text>
+          <path id="circlePath" d="M 210,20 A 190,190 0 1,1 209,20" fill="none"/>
+        </g>
+        <g class="dial-ring rev">
+          <circle cx="210" cy="210" r="150" stroke="#c9a227" stroke-width="1" opacity="0.5"/>
+          <circle cx="210" cy="60" r="4" fill="#e8c04d"/>
+          <circle cx="360" cy="210" r="4" fill="#e8c04d"/>
+          <circle cx="210" cy="360" r="4" fill="#e8c04d"/>
+          <circle cx="60" cy="210" r="4" fill="#e8c04d"/>
+        </g>
+        <circle cx="210" cy="210" r="105" fill="#132a38" stroke="#20404f" stroke-width="1.5"/>
+        <circle cx="210" cy="210" r="80" fill="none" stroke="#c9a227" stroke-width="1"/>
+      </svg>
+      <div class="dial-center-label">
+        <div class="big">05</div>
+        <div class="small">Offers unlocked</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="offers">
+  <div class="section-head">
+    <div class="eyebrow"><span class="dot"></span> Updated today</div>
+    <h2>Choose your reward</h2>
+    <p>Every offer below is served by our advertising partners. Availability and terms are set by each provider and can change without notice.</p>
+  </div>
+
+  <div class="offers-grid">
+
+    <div class="offer-card">
+      <div class="offer-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V9a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v13"/><path d="M13 9h2l3 3v7a2 2 0 0 1-2 2h-1"/><circle cx="7" cy="15" r="1"/><path d="M3 13h10"/></svg>
+      </div>
+      <div class="offer-source">CTConnect</div>
+      <div class="offer-title">Gas Gift Card</div>
+      <p class="offer-desc">Claim a fuel gift card offer to help cover your next fill-up. Free to enter, a few quick steps to complete.</p>
+      <a class="offer-btn" href="https://app.hawktrk.com/click?pid=2&offer_id=21614&sub2=u799509&sub5=s1SUBID1Dibet" target="_blank" rel="noopener">
+        Claim offer
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
+      </a>
+    </div>
+
+    <div class="offer-card">
+      <div class="offer-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+      </div>
+      <div class="offer-source">CTConnect</div>
+      <div class="offer-title">$100 PayPal Reward</div>
+      <p class="offer-desc">A cash-style reward offer credited via PayPal. Complete the partner steps to see if you qualify.</p>
+      <a class="offer-btn" href="https://app.hawktrk.com/click?pid=2&offer_id=576&sub2=u799509&sub5=s1SUBID1Dibet" target="_blank" rel="noopener">
+        Claim offer
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
+      </a>
+    </div>
+
+    <div class="offer-card">
+      <div class="offer-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3a2 2 0 0 1-2 4M7 5H4a2 2 0 0 0 2 4"/></svg>
+      </div>
+      <div class="offer-source">SuperSweepstakes</div>
+      <div class="offer-title">$500K Prize Draw</div>
+      <p class="offer-desc">Enter for a chance at the current $500,000 grand prize sweepstakes. No purchase necessary; see partner terms.</p>
+      <a class="offer-btn" href="https://app.hawktrk.com/click?pid=2&offer_id=21495&sub2=u799509&sub5=s1SUBID1Dibet" target="_blank" rel="noopener">
+        Enter now
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
+      </a>
+    </div>
+
+    <div class="offer-card">
+      <div class="offer-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5"/></svg>
+      </div>
+      <div class="offer-source">PrizeZappy</div>
+      <div class="offer-title">Chance to Win $50K</div>
+      <p class="offer-desc">A quick entry gives you a shot at a $50,000 prize. Takes about two minutes on the partner site.</p>
+      <a class="offer-btn" href="https://app.hawktrk.com/click?pid=2&offer_id=18251&sub2=u799509&sub5=s1SUBID1Dibet" target="_blank" rel="noopener">
+        Enter now
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
+      </a>
+    </div>
+
+    <div class="offer-card">
+      <div class="offer-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C9 6 6 8 6 12a6 6 0 0 0 12 0c0-4-3-6-6-10Z"/><path d="M12 14v6"/></svg>
+      </div>
+      <div class="offer-source">CTConnect</div>
+      <div class="offer-title">$100 Jersey Mike's</div>
+      <p class="offer-desc">Claim a $100 offer good toward your next sub run. Free entry through our partner's short form.</p>
+      <a class="offer-btn" href="https://app.hawktrk.com/click?pid=2&offer_id=21856&sub2=u799535&sub5=s1SUBID1Dibet" target="_blank" rel="noopener">
+        Claim offer
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<section id="how">
+  <div class="section-head">
+    <div class="eyebrow">The process</div>
+    <h2>Three steps, no combination lock required</h2>
+    <p>Every offer above follows the same simple path.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <span class="step-code">01</span>
+      <h3>Pick an offer</h3>
+      <p>Browse today's live list above and choose the one that fits you.</p>
+    </div>
+    <div class="step">
+      <span class="step-code">02</span>
+      <h3>Complete the partner steps</h3>
+      <p>You'll be sent to our advertising partner's page to finish a short, free process.</p>
+    </div>
+    <div class="step">
+      <span class="step-code">03</span>
+      <h3>Track your claim</h3>
+      <p>Follow the confirmation on the partner's site for delivery details and timing.</p>
+    </div>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="section-head">
+    <div class="eyebrow">Member feedback</div>
+    <h2>What people are saying</h2>
+    <div class="testimonial-note">Sample feedback shown below — connect your review platform (Trustpilot, Google, etc.) to replace this with live, verified reviews.</div>
+  </div>
+  <div class="testi-track">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"Placeholder review — swap in a real, verified quote once your review source is connected."</p>
+      <div class="testi-person">
+        <div class="testi-avatar">J</div>
+        <div><div class="testi-name">Sample Member</div><div class="testi-loc">Placeholder location</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"Placeholder review — swap in a real, verified quote once your review source is connected."</p>
+      <div class="testi-person">
+        <div class="testi-avatar">M</div>
+        <div><div class="testi-name">Sample Member</div><div class="testi-loc">Placeholder location</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"Placeholder review — swap in a real, verified quote once your review source is connected."</p>
+      <div class="testi-person">
+        <div class="testi-avatar">R</div>
+        <div><div class="testi-name">Sample Member</div><div class="testi-loc">Placeholder location</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"Placeholder review — swap in a real, verified quote once your review source is connected."</p>
+      <div class="testi-person">
+        <div class="testi-avatar">A</div>
+        <div><div class="testi-name">Sample Member</div><div class="testi-loc">Placeholder location</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="section-head">
+    <div class="eyebrow">Good to know</div>
+    <h2>Frequently asked questions</h2>
+  </div>
+
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">Is Vaultra free to use? <span class="plus">+</span></div>
+      <div class="faq-a">Yes. Browsing and starting an offer is free. Each offer is run by a third-party partner, and their own terms apply once you continue to their site.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Who fulfills these offers? <span class="plus">+</span></div>
+      <div class="faq-a">Vaultra doesn't fulfill offers directly. Each card above links to an advertising partner (e.g. CTConnect, SuperSweepstakes, PrizeZappy) who runs and fulfills that specific offer.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why do offers change? <span class="plus">+</span></div>
+      <div class="faq-a">Our partners rotate availability based on demand and region, so the list updates regularly. If an offer is unavailable, check back soon for a new one.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do I need to make a purchase? <span class="plus">+</span></div>
+      <div class="faq-a">No purchase is required to view or start an offer. Some partner offers may involve optional steps like sign-ups — always read the partner's terms before continuing.</div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <h2>Today's offers won't sit unclaimed for long.</h2>
+  <p>Five live offers, updated regularly. Pick yours before the list refreshes.</p>
+  <a href="#offers" class="btn-primary">View today's offers</a>
+</div>
+
+<p class="disclosure">Vaultra is an independent listing page and is not affiliated with, endorsed by, or sponsored by PayPal, Jersey Mike's, or any brand referenced above. All offers are provided and fulfilled by third-party advertising partners; availability, eligibility, and rewards are determined solely by those partners and are subject to change without notice. This page is compensated for referrals.</p>
+
+<footer>
+  <div class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="18" stroke="#c9a227" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="12" stroke="#e8c04d" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="3.4" fill="#e8c04d"/>
+      </svg>
+    </span>
+    Vaultra
+  </div>
+  <ul class="foot-links">
+    <li><a href="#offers">Offers</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+  </ul>
+</footer>
+
+<script>
+  document.querySelectorAll('.faq-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+      if(!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+
+</body>
+</html>
